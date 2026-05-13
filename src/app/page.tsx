@@ -8,30 +8,45 @@ import { homePageQuery } from "@/sanity/lib/queries";
 const menuItems = ["Vision", "Sanity", "Research", "Journal"];
 
 type SplitSection = {
+  _key?: string;
+  _type: "splitSection";
   kicker?: string;
   title?: string;
   body?: string;
-  image?: SanityImageSource;
+  image?: SanityImageSource | string;
   imageAlt?: string;
   reverse?: boolean;
 };
+
+type LargeImageSection = {
+  _key?: string;
+  _type: "largeImageSection";
+  kicker?: string;
+  title?: string;
+  body?: string;
+  image?: SanityImageSource | string;
+  imageAlt?: string;
+};
+
+type PageSection = SplitSection | LargeImageSection;
 
 type HomePage = {
   heroKicker?: string;
   heroTitle?: string;
   heroText?: string;
   heroVideoUrl?: string;
-  heroPoster?: SanityImageSource;
+  heroPoster?: SanityImageSource | string;
   introKicker?: string;
   introTitle?: string;
-  splitSections?: SplitSection[];
-  featureImage?: SanityImageSource;
+  sections?: PageSection[];
+  splitSections?: Omit<SplitSection, "_type">[];
+  featureImage?: SanityImageSource | string;
   featureKicker?: string;
   featureTitle?: string;
   featureText?: string;
 };
 
-const fallbackHomePage = {
+const fallbackHomePage: HomePage = {
   heroKicker: "Research and development website",
   heroTitle: "Learn Sanity by building a real publishing system.",
   heroText:
@@ -43,8 +58,10 @@ const fallbackHomePage = {
   introKicker: "Current focus",
   introTitle:
     "Create a website that feels editorial, full-screen, and flexible enough for CMS-driven stories.",
-  splitSections: [
+  sections: [
     {
+      _type: "splitSection",
+      _key: "sanity-cms",
       kicker: "01 / Sanity CMS",
       title: "A living content studio for every lesson we build.",
       body: "This space will document schemas, page experiments, and the small decisions that make a CMS project easier to understand. The goal is to learn the tool by publishing with it.",
@@ -53,6 +70,8 @@ const fallbackHomePage = {
       imageAlt: "Abstract architectural structure with clean geometric lines",
     },
     {
+      _type: "splitSection",
+      _key: "development",
       kicker: "02 / Development",
       title: "From research notes to working Next.js pages.",
       body: "Each section can become a pattern for future work: a content type, a data source, an analytics event, or a deployable feature on Vercel.",
@@ -60,6 +79,47 @@ const fallbackHomePage = {
         "https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1400&q=85",
       imageAlt: "Modern workspace with computers and research materials",
       reverse: true,
+    },
+    {
+      _type: "splitSection",
+      _key: "content-models",
+      kicker: "03 / Content models",
+      title: "Shape every page from reusable editorial blocks.",
+      body: "Add, reorder, and refine sections directly from the CMS instead of hard-coding every new page idea.",
+      image:
+        "https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=1400&q=85",
+      imageAlt: "Editorial workspace with planning materials",
+    },
+    {
+      _type: "largeImageSection",
+      _key: "large-image-pattern",
+      kicker: "04 / Big image pattern",
+      title: "One image can take the full two-column space.",
+      body: "Smaller text blocks can sit in opposite corners for observations, captions, project notes, or Sanity-powered annotations.",
+      image:
+        "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1800&q=85",
+      imageAlt: "Wide natural landscape",
+    },
+    {
+      _type: "splitSection",
+      _key: "publishing-flow",
+      kicker: "05 / Publishing flow",
+      title: "Move from draft to published pages with a clear content rhythm.",
+      body: "Use the Studio as the place where ideas become structured content, ready for the front end to display.",
+      image:
+        "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=1400&q=85",
+      imageAlt: "Creative team planning content on a table",
+      reverse: true,
+    },
+    {
+      _type: "largeImageSection",
+      _key: "visual-system",
+      kicker: "06 / Visual system",
+      title: "Large images create breathing room between dense content sections.",
+      body: "Use this module for atmosphere, chapter breaks, campaign visuals, or full-width CMS-led storytelling.",
+      image:
+        "https://images.unsplash.com/photo-1493246507139-91e8fad9978e?auto=format&fit=crop&w=1800&q=85",
+      imageAlt: "Wide forest landscape with soft light",
     },
   ],
   featureImage:
@@ -79,7 +139,40 @@ function imageSource(source?: SanityImageSource | string) {
     return source;
   }
 
+  if (typeof source !== "object" || !("asset" in source) || !source.asset) {
+    return undefined;
+  }
+
   return urlFor(source).width(1800).quality(85).url();
+}
+
+function legacySections(content: HomePage): PageSection[] {
+  const splitSections = content.splitSections?.length
+    ? content.splitSections.map((section, index) => ({
+        ...section,
+        _type: "splitSection" as const,
+        _key: section._key || `legacy-split-${index}`,
+      }))
+    : [];
+
+  const featureImageSection =
+    content.featureImage ||
+    content.featureKicker ||
+    content.featureTitle ||
+    content.featureText
+      ? [
+          {
+            _type: "largeImageSection" as const,
+            _key: "legacy-large-image",
+            kicker: content.featureKicker,
+            title: content.featureTitle,
+            body: content.featureText,
+            image: content.featureImage,
+          },
+        ]
+      : [];
+
+  return [...splitSections, ...featureImageSection];
 }
 
 export default async function Home() {
@@ -92,12 +185,12 @@ export default async function Home() {
   const content = {
     ...fallbackHomePage,
     ...homePage,
-    splitSections:
-      homePage?.splitSections?.length ? homePage.splitSections : fallbackHomePage.splitSections,
   };
 
   const heroPoster = imageSource(content.heroPoster);
-  const featureImage = imageSource(content.featureImage);
+  const sections = homePage?.sections?.length
+    ? homePage.sections
+    : legacySections(homePage || fallbackHomePage);
 
   return (
     <main>
@@ -138,7 +231,35 @@ export default async function Home() {
         <h2>{content.introTitle}</h2>
       </section>
 
-      {content.splitSections.map((section, index) => {
+      {sections.map((section, index) => {
+        if (section._type === "largeImageSection") {
+          const sectionImage = imageSource(section.image);
+
+          return (
+            <section
+              id={index === sections.length - 1 ? "journal" : undefined}
+              className="feature-image"
+              key={section._key || `${section.title}-${index}`}
+            >
+              {sectionImage ? (
+                <Image
+                  src={sectionImage}
+                  alt={section.imageAlt || ""}
+                  fill
+                  sizes="100vw"
+                />
+              ) : null}
+              <div className="corner-note top-left">
+                <p className="section-kicker">{section.kicker}</p>
+                <h2>{section.title}</h2>
+              </div>
+              <div className="corner-note bottom-right">
+                <p>{section.body}</p>
+              </div>
+            </section>
+          );
+        }
+
         const sectionImage = imageSource(section.image);
 
         return (
@@ -165,24 +286,6 @@ export default async function Home() {
           </section>
         );
       })}
-
-      <section id="journal" className="feature-image">
-        {featureImage ? (
-          <Image
-            src={featureImage}
-            alt=""
-            fill
-            sizes="100vw"
-          />
-        ) : null}
-        <div className="corner-note top-left">
-          <p className="section-kicker">{content.featureKicker}</p>
-          <h2>{content.featureTitle}</h2>
-        </div>
-        <div className="corner-note bottom-right">
-          <p>{content.featureText}</p>
-        </div>
-      </section>
     </main>
   );
 }

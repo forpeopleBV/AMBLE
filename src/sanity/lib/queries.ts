@@ -6,6 +6,16 @@ export const homePageQuery = `*[_type == "homePage"][0]{
   heroPoster,
   introKicker,
   introTitle,
+  sections[]{
+    _key,
+    _type,
+    kicker,
+    title,
+    body,
+    image,
+    imageAlt,
+    reverse
+  },
   splitSections[]{
     kicker,
     title,

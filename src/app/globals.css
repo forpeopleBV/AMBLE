@@ -187,8 +187,10 @@ video {
 }
 
 .split-media {
+  position: relative;
   min-height: 100svh;
   overflow: hidden;
+  background: var(--ink);
 }
 
 .split-media img {

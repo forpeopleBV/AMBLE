@@ -25,13 +25,32 @@ Then open http://localhost:3000.
 
 Sanity Studio is embedded in this Next.js app.
 
+### Connect locally
+
+1. Start the Next.js development server:
+
 ```bash
 npm run dev
 ```
 
-Then open http://localhost:3000/studio.
+2. Open the Studio route in your browser:
 
-Log in with the same Sanity account that owns the `amble` project.
+http://localhost:3000/studio
+
+3. Log in with a Sanity account that has access to the `amble` project.
+
+The Studio uses:
+
+- project name: `amble`
+- studio title: `Amble CMS`
+- project ID: `1ox7u1sj`
+- dataset: `production`
+
+If Sanity asks you to choose a login method, use the same Google, GitHub, or email account that was invited to the Sanity project.
+
+### If access is denied
+
+Ask a project owner to invite your Sanity account from the Sanity project settings. You need at least editor access to create or update content.
 
 ## Current Design Direction
 
