@@ -1,0 +1,21 @@
+export const homePageQuery = `*[_type == "homePage"][0]{
+  heroKicker,
+  heroTitle,
+  heroText,
+  heroVideoUrl,
+  heroPoster,
+  introKicker,
+  introTitle,
+  splitSections[]{
+    kicker,
+    title,
+    body,
+    image,
+    imageAlt,
+    reverse
+  },
+  featureImage,
+  featureKicker,
+  featureTitle,
+  featureText
+}`;
