@@ -25,9 +25,13 @@ export default defineConfig({
                   .documentId("homePage")
                   .title("Home Page"),
               ),
+            S.listItem()
+              .title("Pages")
+              .schemaType("page")
+              .child(S.documentTypeList("page").title("Pages")),
             S.divider(),
             ...S.documentTypeListItems().filter(
-              (item) => item.getId() !== "homePage",
+              (item) => !["homePage", "page"].includes(item.getId() || ""),
             ),
           ]),
     }),

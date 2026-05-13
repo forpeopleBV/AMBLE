@@ -1,5 +1,7 @@
 import { defineArrayMember, defineField, defineType } from "sanity";
 
+import { pageSectionMembers } from "./objects/pageSections";
+
 export const homePage = defineType({
   name: "homePage",
   title: "Home Page",
@@ -167,119 +169,7 @@ export const homePage = defineType({
       description:
         "Drag sections to reorder the page. Use one hero image/video section, then add as many two-column sections as needed.",
       type: "array",
-      of: [
-        defineArrayMember({
-          name: "heroSection",
-          title: "Hero image/video section",
-          type: "object",
-          fields: [
-            defineField({
-              name: "kicker",
-              title: "Small title",
-              type: "string",
-            }),
-            defineField({
-              name: "title",
-              title: "Title",
-              type: "string",
-            }),
-            defineField({
-              name: "body",
-              title: "Text",
-              type: "text",
-              rows: 3,
-            }),
-            defineField({
-              name: "videoUrl",
-              title: "Video URL",
-              description:
-                "Optional MP4 URL. If empty, the hero uses the image instead.",
-              type: "url",
-            }),
-            defineField({
-              name: "image",
-              title: "Hero image",
-              type: "image",
-              options: {
-                hotspot: true,
-              },
-            }),
-            defineField({
-              name: "imageAlt",
-              title: "Image alt text",
-              type: "string",
-            }),
-          ],
-          preview: {
-            select: {
-              title: "title",
-              media: "image",
-            },
-            prepare({ title, media }) {
-              return {
-                title: title || "Hero image/video section",
-                subtitle: "Hero image/video section",
-                media,
-              };
-            },
-          },
-        }),
-        defineArrayMember({
-          name: "twoColumnSection",
-          title: "Two-column section",
-          type: "object",
-          fields: [
-            defineField({
-              name: "kicker",
-              title: "Small title",
-              type: "string",
-            }),
-            defineField({
-              name: "title",
-              title: "Title",
-              type: "string",
-            }),
-            defineField({
-              name: "body",
-              title: "Text",
-              type: "text",
-              rows: 4,
-            }),
-            defineField({
-              name: "image",
-              title: "Image",
-              type: "image",
-              options: {
-                hotspot: true,
-              },
-            }),
-            defineField({
-              name: "imageAlt",
-              title: "Image alt text",
-              type: "string",
-            }),
-            defineField({
-              name: "reverse",
-              title: "Image on the right",
-              type: "boolean",
-              initialValue: false,
-            }),
-          ],
-          preview: {
-            select: {
-              title: "title",
-              media: "image",
-            },
-            prepare({ title, media }) {
-              return {
-                title: title || "Two-column section",
-                subtitle: "Two-column section",
-                media,
-              };
-            },
-          },
-        }),
-      ],
+      of: pageSectionMembers,
     }),
     defineField({
       name: "splitSections",
