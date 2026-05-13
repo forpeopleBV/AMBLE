@@ -7,9 +7,20 @@ import { homePageQuery } from "@/sanity/lib/queries";
 
 const menuItems = ["Vision", "Sanity", "Research", "Journal"];
 
-type SplitSection = {
+type HeroSection = {
   _key?: string;
-  _type: "splitSection";
+  _type: "heroSection";
+  kicker?: string;
+  title?: string;
+  body?: string;
+  videoUrl?: string;
+  image?: SanityImageSource | string;
+  imageAlt?: string;
+};
+
+type TwoColumnSection = {
+  _key?: string;
+  _type: "twoColumnSection" | "splitSection" | "largeImageSection";
   kicker?: string;
   title?: string;
   body?: string;
@@ -18,17 +29,7 @@ type SplitSection = {
   reverse?: boolean;
 };
 
-type LargeImageSection = {
-  _key?: string;
-  _type: "largeImageSection";
-  kicker?: string;
-  title?: string;
-  body?: string;
-  image?: SanityImageSource | string;
-  imageAlt?: string;
-};
-
-type PageSection = SplitSection | LargeImageSection;
+type PageSection = HeroSection | TwoColumnSection;
 
 type HomePage = {
   heroKicker?: string;
@@ -39,7 +40,7 @@ type HomePage = {
   introKicker?: string;
   introTitle?: string;
   sections?: PageSection[];
-  splitSections?: Omit<SplitSection, "_type">[];
+  splitSections?: Omit<TwoColumnSection, "_type">[];
   featureImage?: SanityImageSource | string;
   featureKicker?: string;
   featureTitle?: string;
@@ -60,7 +61,30 @@ const fallbackHomePage: HomePage = {
     "Create a website that feels editorial, full-screen, and flexible enough for CMS-driven stories.",
   sections: [
     {
-      _type: "splitSection",
+      _type: "heroSection",
+      _key: "hero",
+      kicker: "Research and development website",
+      title: "Learn Sanity by building a real publishing system.",
+      body: "A visual lab for Next.js, Sanity CMS, Vercel, GitHub, data sources, and analytics. Every section is made to become a lesson.",
+      videoUrl:
+        "https://videos.pexels.com/video-files/3129957/3129957-uhd_2560_1440_25fps.mp4",
+      image:
+        "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1800&q=85",
+      imageAlt: "Laptop screen with code and research notes",
+    },
+    {
+      _type: "twoColumnSection",
+      _key: "current-focus",
+      kicker: "Current focus",
+      title:
+        "Create a website that feels editorial, full-screen, and flexible enough for CMS-driven stories.",
+      body: "Use this section as a focused bridge between the hero and the deeper content modules.",
+      image:
+        "https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=1400&q=85",
+      imageAlt: "Editorial planning table",
+    },
+    {
+      _type: "twoColumnSection",
       _key: "sanity-cms",
       kicker: "01 / Sanity CMS",
       title: "A living content studio for every lesson we build.",
@@ -70,7 +94,7 @@ const fallbackHomePage: HomePage = {
       imageAlt: "Abstract architectural structure with clean geometric lines",
     },
     {
-      _type: "splitSection",
+      _type: "twoColumnSection",
       _key: "development",
       kicker: "02 / Development",
       title: "From research notes to working Next.js pages.",
@@ -81,7 +105,7 @@ const fallbackHomePage: HomePage = {
       reverse: true,
     },
     {
-      _type: "splitSection",
+      _type: "twoColumnSection",
       _key: "content-models",
       kicker: "03 / Content models",
       title: "Shape every page from reusable editorial blocks.",
@@ -91,7 +115,7 @@ const fallbackHomePage: HomePage = {
       imageAlt: "Editorial workspace with planning materials",
     },
     {
-      _type: "largeImageSection",
+      _type: "twoColumnSection",
       _key: "large-image-pattern",
       kicker: "04 / Big image pattern",
       title: "One image can take the full two-column space.",
@@ -99,9 +123,10 @@ const fallbackHomePage: HomePage = {
       image:
         "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1800&q=85",
       imageAlt: "Wide natural landscape",
+      reverse: true,
     },
     {
-      _type: "splitSection",
+      _type: "twoColumnSection",
       _key: "publishing-flow",
       kicker: "05 / Publishing flow",
       title: "Move from draft to published pages with a clear content rhythm.",
@@ -112,7 +137,7 @@ const fallbackHomePage: HomePage = {
       reverse: true,
     },
     {
-      _type: "largeImageSection",
+      _type: "twoColumnSection",
       _key: "visual-system",
       kicker: "06 / Visual system",
       title: "Large images create breathing room between dense content sections.",
@@ -147,32 +172,71 @@ function imageSource(source?: SanityImageSource | string) {
 }
 
 function legacySections(content: HomePage): PageSection[] {
+  const heroSection: HeroSection = {
+    _type: "heroSection",
+    _key: "legacy-hero",
+    kicker: content.heroKicker,
+    title: content.heroTitle,
+    body: content.heroText,
+    videoUrl: content.heroVideoUrl,
+    image: content.heroPoster,
+  };
+
+  const introSection: TwoColumnSection =
+    content.introKicker || content.introTitle
+      ? {
+          _type: "twoColumnSection",
+          _key: "legacy-intro",
+          kicker: content.introKicker,
+          title: content.introTitle,
+          body: "Use this section as a focused bridge between the hero and the deeper content modules.",
+        }
+      : {
+          _type: "twoColumnSection",
+          _key: "legacy-intro",
+        };
+
   const splitSections = content.splitSections?.length
     ? content.splitSections.map((section, index) => ({
         ...section,
-        _type: "splitSection" as const,
+        _type: "twoColumnSection" as const,
         _key: section._key || `legacy-split-${index}`,
       }))
     : [];
 
-  const featureImageSection =
+  const featureImageSection: TwoColumnSection[] =
     content.featureImage ||
     content.featureKicker ||
     content.featureTitle ||
     content.featureText
       ? [
           {
-            _type: "largeImageSection" as const,
+            _type: "twoColumnSection" as const,
             _key: "legacy-large-image",
             kicker: content.featureKicker,
             title: content.featureTitle,
             body: content.featureText,
             image: content.featureImage,
+            reverse: true,
           },
         ]
       : [];
 
-  return [...splitSections, ...featureImageSection];
+  return [heroSection, introSection, ...splitSections, ...featureImageSection];
+}
+
+function normalizeSections(content: HomePage): PageSection[] {
+  const sections = content.sections?.length
+    ? content.sections
+    : legacySections(content);
+
+  const hasHero = sections.some((section) => section._type === "heroSection");
+
+  if (hasHero) {
+    return sections;
+  }
+
+  return [legacySections(content)[0], ...sections];
 }
 
 export default async function Home() {
@@ -187,10 +251,7 @@ export default async function Home() {
     ...homePage,
   };
 
-  const heroPoster = imageSource(content.heroPoster);
-  const sections = homePage?.sections?.length
-    ? homePage.sections
-    : legacySections(homePage || fallbackHomePage);
+  const sections = normalizeSections(content);
 
   return (
     <main>
@@ -207,53 +268,41 @@ export default async function Home() {
         </nav>
       </header>
 
-      <section id="top" className="hero" aria-label="Research and development intro">
-        <video
-          className="hero-video"
-          autoPlay
-          muted
-          loop
-          playsInline
-          poster={heroPoster}
-        >
-          <source src={content.heroVideoUrl} type="video/mp4" />
-        </video>
-        <div className="hero-overlay" />
-        <div className="hero-content">
-          <p className="section-kicker">{content.heroKicker}</p>
-          <h1>{content.heroTitle}</h1>
-          <p>{content.heroText}</p>
-        </div>
-      </section>
-
-      <section id="vision" className="intro-strip">
-        <p>{content.introKicker}</p>
-        <h2>{content.introTitle}</h2>
-      </section>
-
       {sections.map((section, index) => {
-        if (section._type === "largeImageSection") {
+        if (section._type === "heroSection") {
           const sectionImage = imageSource(section.image);
 
           return (
             <section
-              id={index === sections.length - 1 ? "journal" : undefined}
-              className="feature-image"
+              id={index === 0 ? "top" : undefined}
+              className="hero"
+              aria-label={section.title || "Hero section"}
               key={section._key || `${section.title}-${index}`}
             >
-              {sectionImage ? (
+              {section.videoUrl ? (
+                <video
+                  className="hero-video"
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  poster={sectionImage}
+                >
+                  <source src={section.videoUrl} type="video/mp4" />
+                </video>
+              ) : sectionImage ? (
                 <Image
+                  className="hero-video"
                   src={sectionImage}
                   alt={section.imageAlt || ""}
                   fill
                   sizes="100vw"
                 />
               ) : null}
-              <div className="corner-note top-left">
+              <div className="hero-overlay" />
+              <div className="hero-content">
                 <p className="section-kicker">{section.kicker}</p>
-                <h2>{section.title}</h2>
-              </div>
-              <div className="corner-note bottom-right">
+                <h1>{section.title}</h1>
                 <p>{section.body}</p>
               </div>
             </section>
@@ -264,7 +313,15 @@ export default async function Home() {
 
         return (
           <section
-            id={index === 0 ? "sanity" : "research"}
+            id={
+              index === 0
+                ? "top"
+                : index === 1
+                  ? "vision"
+                  : index === 2
+                    ? "sanity"
+                    : "research"
+            }
             className={`split-section ${section.reverse ? "is-reversed" : ""}`}
             key={`${section.title}-${index}`}
           >

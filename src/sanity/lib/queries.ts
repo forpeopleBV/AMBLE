@@ -12,6 +12,7 @@ export const homePageQuery = `*[_type == "homePage"][0]{
     kicker,
     title,
     body,
+    videoUrl,
     image,
     imageAlt,
     reverse
