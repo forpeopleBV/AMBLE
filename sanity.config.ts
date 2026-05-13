@@ -29,6 +29,26 @@ export default defineConfig({
               .title("Pages")
               .schemaType("page")
               .child(S.documentTypeList("page").title("Pages")),
+            S.listItem()
+              .title("Assets")
+              .child(
+                S.list()
+                  .title("Assets")
+                  .items([
+                    S.listItem()
+                      .title("Images")
+                      .schemaType("sanity.imageAsset")
+                      .child(
+                        S.documentTypeList("sanity.imageAsset").title("Images"),
+                      ),
+                    S.listItem()
+                      .title("Files")
+                      .schemaType("sanity.fileAsset")
+                      .child(
+                        S.documentTypeList("sanity.fileAsset").title("Files"),
+                      ),
+                  ]),
+              ),
             S.divider(),
             ...S.documentTypeListItems().filter(
               (item) => !["homePage", "page"].includes(item.getId() || ""),
